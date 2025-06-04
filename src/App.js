@@ -64,7 +64,7 @@ export default function App() {
 
   return (
     <div className="calculator-box">
-      <h1>SaaS & Payments Kalkulačka</h1>
+      <h1>SaaS & Payments fee comparator</h1>
       <label>Zvolte měnu</label>
       <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
         <option value="€">€</option>
