@@ -13,7 +13,7 @@ export default function App() {
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "Vaše TPV konkurence",
+        competitorTPV: "Vaše TPV",
         competitorTR: "Take rate konkurence (%)",
         competitorSaaS: "Měsíční SAAS poplatek konkurence",
         ourTPV: "Vaše měsíční TPV",
