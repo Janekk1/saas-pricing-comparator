@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   LineElement,
@@ -9,7 +10,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
@@ -22,54 +22,54 @@ export default function App() {
 
   const t = {
     cz: {
-      title: "SAAS & Payments Kalkulačka",
+      title: "SaaS & Payments Kalkulačka",
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "Měsíční TPV",
+        competitorTPV: "TPV konkurence",
         competitorTR: "Take rate konkurence (%)",
-        competitorSaaS: "Měsíční SAAS poplatek konkurence",
-        ourTPV: "Měsíční TPV",
-        ourTR: "Náš Take rate (%)",
-        ourSaaS: "Náš měsíční SAAS poplatek",
-        hwPrice: "Cena našeho HW zařízení"
+        competitorSaaS: "SaaS poplatek konkurence",
+        ourTPV: "Váš TPV",
+        ourTR: "Váš Take rate (%)",
+        ourSaaS: "Váš SaaS poplatek",
+        hwPrice: "Cena HW"
       },
       results: {
         header: "Výsledky",
         competitorTotal: "Celková cena konkurence",
-        ourTotal: "Naše celková cena",
+        ourTotal: "Vaše celková cena",
         diff: "Rozdíl",
         desc: (delta, cur, payback) => delta < 0
-          ? `Naše nabídka je levnější o ${cur}${Math.abs(delta).toFixed(2)}. Výhodnější struktura nákladů nebo poplatků.` +
+          ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta).toFixed(2)}. Výhodnější struktura nákladů nebo poplatků.` +
             (payback ? ` Při ceně HW ${cur}${hwPrice} se investice vrátí za ${payback} měsíců.` : "")
           : delta > 0
-          ? `Naše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SaaS poplatek.`
+          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SaaS poplatek.`
           : `Obě nabídky jsou cenově totožné.`
       }
     },
     en: {
-      title: "SAAS & Payments Calculator",
+      title: "SaaS & Payments Calculator",
       selectCurrency: "Select Currency",
       selectLanguage: "Select Language",
       labels: {
-        competitorTPV: "Monthly TPV",
+        competitorTPV: "Competitor TPV",
         competitorTR: "Competitor Take Rate (%)",
-        competitorSaaS: "Competitor monthly SAAS Fee",
-        ourTPV: "Monthly TPV",
-        ourTR: "Our Take Rate (%)",
-        ourSaaS: "Our monthly SAAS Fee",
-        hwPrice: "Price of our Hardware."
+        competitorSaaS: "Competitor SaaS Fee",
+        ourTPV: "Your TPV",
+        ourTR: "Your Take Rate (%)",
+        ourSaaS: "Your SaaS Fee",
+        hwPrice: "Hardware Price"
       },
       results: {
         header: "Results",
-        competitorTotal: "Total Cost with competition.",
-        ourTotal: "Total Cost with us",
+        competitorTotal: "Competitor Total Cost",
+        ourTotal: "Your Total Cost",
         diff: "Difference",
         desc: (delta, cur, payback) => delta < 0
-          ? `Our offer is cheaper by ${cur}${Math.abs(delta).toFixed(2)}. More efficient fee structure.` +
+          ? `Your offer is cheaper by ${cur}${Math.abs(delta).toFixed(2)}. More efficient fee structure.` +
             (payback ? ` With hardware price of ${cur}${hwPrice}, the investment pays back in ${payback} months.` : "")
           : delta > 0
-          ? `Our offer is more expensive by ${cur}${Math.abs(delta).toFixed(2)}. Likely due to higher take rate or SaaS fee.`
+          ? `Your offer is more expensive by ${cur}${Math.abs(delta).toFixed(2)}. Likely due to higher take rate or SaaS fee.`
           : `Both offers cost the same.`
       }
     }
