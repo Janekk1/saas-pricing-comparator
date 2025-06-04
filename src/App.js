@@ -9,54 +9,54 @@ export default function App() {
 
   const t = {
     cz: {
-      title: "SaaS & Payments Kalkulačka",
+      title: "SAAS & Payments Kalkulačka",
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "TPV konkurence",
+        competitorTPV: "Vaše TPV konkurence",
         competitorTR: "Take rate konkurence (%)",
-        competitorSaaS: "SaaS poplatek konkurence",
-        ourTPV: "Váš TPV",
-        ourTR: "Váš Take rate (%)",
-        ourSaaS: "Váš SaaS poplatek",
-        hwPrice: "Cena HW"
+        competitorSaaS: "Měsíční SAAS poplatek konkurence",
+        ourTPV: "Vaše měsíční TPV",
+        ourTR: "Náš Take rate (%)",
+        ourSaaS: "Náš měsíční SAAS poplatek",
+        hwPrice: "Cena našeho nového HW"
       },
       results: {
         header: "Výsledky",
         competitorTotal: "Celková cena konkurence",
-        ourTotal: "Vaše celková cena",
+        ourTotal: "Naše celková cena",
         diff: "Rozdíl",
-        desc: (delta, cur, payback) => delta < 0
-          ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.` +
-            (payback ? ` Investice do HW (${cur}${hwPrice}) se vrátí za ${payback} měsíců.` : "")
+        desc: (delta, payback) => delta < 0
+          ? `Naše nabídka je levnější o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.` +
+            (payback ? ` Investice do HW (${hwPrice.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}) se vrátí za ${payback} měsíců.` : "")
           : delta > 0
-          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.`
+          ? `Naše nabídka je dražší o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.`
           : `Obě nabídky jsou cenově totožné.`
       }
     },
     en: {
-      title: "SaaS & Payments Calculator",
+      title: "SAAS & Payments Calculator",
       selectCurrency: "Select Currency",
       selectLanguage: "Select Language",
       labels: {
-        competitorTPV: "Competitor TPV",
+        competitorTPV: "Your monthly TPV",
         competitorTR: "Competitor Take Rate (%)",
-        competitorSaaS: "Competitor SaaS Fee",
-        ourTPV: "Your TPV",
-        ourTR: "Your Take Rate (%)",
-        ourSaaS: "Your SaaS Fee",
-        hwPrice: "Hardware Price"
+        competitorSaaS: "Competitor monthly SAAS Fee",
+        ourTPV: "Your monthly TPV",
+        ourTR: "Our Take Rate (%)",
+        ourSaaS: "Our monthly SaaS Fee",
+        hwPrice: "Price of our new hardware"
       },
       results: {
         header: "Results",
-        competitorTotal: "Competitor Total Cost",
-        ourTotal: "Your Total Cost",
+        competitorTotal: "Competitor Total fee",
+        ourTotal: "Our Total fee",
         diff: "Difference",
-        desc: (delta, cur, payback) => delta < 0
-          ? `Your offer is cheaper by ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.` +
-            (payback ? ` The hardware investment (${cur}${hwPrice}) pays back in ${payback} months.` : "")
+        desc: (delta, payback) => delta < 0
+          ? `Our offer is cheaper by ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.` +
+            (payback ? ` The hardware investment (${hwPrice.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}) pays back in ${payback} months.` : "")
           : delta > 0
-          ? `Your offer is more expensive by ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.`
+          ? `Our offer is more expensive by ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.`
           : `Both offers cost the same.`
       }
     }
@@ -107,10 +107,10 @@ export default function App() {
 
       <div className="summary">
         <h2>{copy.results.header}</h2>
-<p>{copy.results.competitorTotal}: {compTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-<p>{copy.results.ourTotal}: {oursTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-<p>{copy.results.diff}: {delta.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-<p><strong>{copy.results.desc(delta, currency, payback)}</strong></p>
+        <p>{copy.results.competitorTotal}: {compTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+        <p>{copy.results.ourTotal}: {oursTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+        <p>{copy.results.diff}: {delta.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+        <p><strong>{copy.results.desc(delta, payback)}</strong></p>
       </div>
     </div>
   );
