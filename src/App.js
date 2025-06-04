@@ -9,16 +9,16 @@ export default function App() {
 
   const t = {
     cz: {
-      title: "SaaS & Payments Kalkulačka",
+      title: "SAAS & Payments Kalkulačka",
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "TPV konkurence",
+        competitorTPV: "Měsíční TPV konkurence",
         competitorTR: "Take rate konkurence (%)",
         competitorSaaS: "SaaS poplatek konkurence",
-        ourTPV: "Váš TPV",
+        ourTPV: "Vaše měsíční TPV",
         ourTR: "Váš Take rate (%)",
-        ourSaaS: "Váš SaaS poplatek"
+        ourSaaS: "Váš měsíční SAAS poplatek"
       },
       results: {
         header: "Výsledky",
@@ -26,23 +26,23 @@ export default function App() {
         ourTotal: "Vaše celková cena",
         diff: "Rozdíl",
         desc: (delta, cur) => delta > 0
-          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SaaS poplatek.`
+          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SAAS poplatek.`
           : delta < 0
             ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta).toFixed(2)}. Výhodnější struktura nákladů nebo poplatků.`
             : `Obě nabídky jsou cenově totožné.`
       }
     },
     en: {
-      title: "SaaS & Payments Calculator",
+      title: "SAAS & Payments Comparator",
       selectCurrency: "Select Currency",
       selectLanguage: "Select Language",
       labels: {
-        competitorTPV: "Competitor TPV",
+        competitorTPV: "Competitor monthly TPV",
         competitorTR: "Competitor Take Rate (%)",
-        competitorSaaS: "Competitor SaaS Fee",
-        ourTPV: "Your TPV",
+        competitorSaaS: "Competitor monthly SaaS Fee",
+        ourTPV: "Your monthly TPV",
         ourTR: "Your Take Rate (%)",
-        ourSaaS: "Your SaaS Fee"
+        ourSaaS: "Your SaaS monthly Fee"
       },
       results: {
         header: "Results",
@@ -116,8 +116,8 @@ export default function App() {
 
       <label>{copy.selectLanguage}</label>
       <select value={lang} onChange={(e) => setLang(e.target.value)}>
-        <option value="cz">🇨🇿 Čeština</option>
-        <option value="en">🇬🇧 English</option>
+        <option value="cz">Čeština</option>
+        <option value="en">English</option>
       </select>
 
       <label>{copy.selectCurrency}</label>
