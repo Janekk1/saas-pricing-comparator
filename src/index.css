@@ -1,1 +1,48 @@
-body { font-family: 'Figtree', sans-serif; padding: 2rem; }
+body {
+  font-family: 'Figtree', sans-serif;
+  background-color: #f8f8f8;
+  margin: 0;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.calculator-box {
+  background: #fff;
+  border: 2px solid #f05a5a;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+h1 {
+  color: #f05a5a;
+  margin-bottom: 1rem;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 1rem;
+}
+
+.summary {
+  margin-top: 2rem;
+  background: #fef6f6;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #f05a5a;
+}
