@@ -27,10 +27,10 @@ export default function App() {
         ourTotal: "Vaše celková cena",
         diff: "Rozdíl",
         desc: (delta, cur, payback) => delta < 0
-          ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta).toFixed(2)}.` +
+          ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.` +
             (payback ? ` Investice do HW (${cur}${hwPrice}) se vrátí za ${payback} měsíců.` : "")
           : delta > 0
-          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}.`
+          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.`
           : `Obě nabídky jsou cenově totožné.`
       }
     },
@@ -53,10 +53,10 @@ export default function App() {
         ourTotal: "Your Total Cost",
         diff: "Difference",
         desc: (delta, cur, payback) => delta < 0
-          ? `Your offer is cheaper by ${cur}${Math.abs(delta).toFixed(2)}.` +
+          ? `Your offer is cheaper by ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.` +
             (payback ? ` The hardware investment (${cur}${hwPrice}) pays back in ${payback} months.` : "")
           : delta > 0
-          ? `Your offer is more expensive by ${cur}${Math.abs(delta).toFixed(2)}.`
+          ? `Your offer is more expensive by ${cur}${Math.abs(delta)value.toLocaleString(undefined, { maximumFractionDigits: 0 })}.`
           : `Both offers cost the same.`
       }
     }
@@ -107,10 +107,10 @@ export default function App() {
 
       <div className="summary">
         <h2>{copy.results.header}</h2>
-        <p>{copy.results.competitorTotal}: {currency}{compTotal.toFixed(2)}</p>
-        <p>{copy.results.ourTotal}: {currency}{oursTotal.toFixed(2)}</p>
-        <p>{copy.results.diff}: {currency}{delta.toFixed(2)}</p>
-        <p><strong>{copy.results.desc(delta, currency, payback)}</strong></p>
+<p>{copy.results.competitorTotal}: {compTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+<p>{copy.results.ourTotal}: {oursTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+<p>{copy.results.diff}: {delta.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
+<p><strong>{copy.results.desc(delta, currency, payback)}</strong></p>
       </div>
     </div>
   );
