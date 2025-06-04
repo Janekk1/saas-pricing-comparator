@@ -5,6 +5,60 @@ export default function App() {
   const [competitor, setCompetitor] = useState({ tpv: 100000, takeRate: 1.5, saasFee: 200 });
   const [ours, setOurs] = useState({ tpv: 100000, takeRate: 1.2, saasFee: 250 });
   const [currency, setCurrency] = useState("€");
+  const [lang, setLang] = useState("cz");
+
+  const t = {
+    cz: {
+      title: "SaaS & Payments Kalkulačka",
+      selectCurrency: "Zvolte měnu",
+      selectLanguage: "Zvolte jazyk",
+      labels: {
+        competitorTPV: "TPV konkurence",
+        competitorTR: "Take rate konkurence (%)",
+        competitorSaaS: "SaaS poplatek konkurence",
+        ourTPV: "Váš TPV",
+        ourTR: "Váš Take rate (%)",
+        ourSaaS: "Váš SaaS poplatek"
+      },
+      results: {
+        header: "Výsledky",
+        competitorTotal: "Celková cena konkurence",
+        ourTotal: "Vaše celková cena",
+        diff: "Rozdíl",
+        desc: (delta, cur) => delta > 0
+          ? `Vaše nabídka je dražší o ${cur}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SaaS poplatek.`
+          : delta < 0
+            ? `Vaše nabídka je levnější o ${cur}${Math.abs(delta).toFixed(2)}. Výhodnější struktura nákladů nebo poplatků.`
+            : `Obě nabídky jsou cenově totožné.`
+      }
+    },
+    en: {
+      title: "SaaS & Payments Calculator",
+      selectCurrency: "Select Currency",
+      selectLanguage: "Select Language",
+      labels: {
+        competitorTPV: "Competitor TPV",
+        competitorTR: "Competitor Take Rate (%)",
+        competitorSaaS: "Competitor SaaS Fee",
+        ourTPV: "Your TPV",
+        ourTR: "Your Take Rate (%)",
+        ourSaaS: "Your SaaS Fee"
+      },
+      results: {
+        header: "Results",
+        competitorTotal: "Competitor Total Cost",
+        ourTotal: "Your Total Cost",
+        diff: "Difference",
+        desc: (delta, cur) => delta > 0
+          ? `Your offer is more expensive by ${cur}${Math.abs(delta).toFixed(2)}. Likely due to higher take rate or SaaS fee.`
+          : delta < 0
+            ? `Your offer is cheaper by ${cur}${Math.abs(delta).toFixed(2)}. More efficient fee structure.`
+            : `Both offers cost the same.`
+      }
+    }
+  };
+
+  const copy = t[lang];
 
   const handleImport = (e) => {
     const file = e.target.files[0];
@@ -18,7 +72,7 @@ export default function App() {
           setCompetitor(data.competitor);
           setOurs(data.ours);
         } catch {
-          alert('Neplatný JSON soubor');
+          alert("Invalid JSON file");
         }
       };
       reader.readAsText(file);
@@ -44,7 +98,7 @@ export default function App() {
             saasFee: parseFloat(obj['our_saas_fee'])
           });
         } catch {
-          alert('Neplatný XLSX soubor');
+          alert("Invalid XLSX file");
         }
       };
       reader.readAsArrayBuffer(file);
@@ -56,16 +110,17 @@ export default function App() {
   const oursTotal = calculate(ours);
   const delta = oursTotal - compTotal;
 
-  const description = delta > 0
-    ? `Vaše nabídka je dražší o ${currency}${Math.abs(delta).toFixed(2)}. Největší rozdíl pravděpodobně způsobuje vyšší take rate nebo SaaS poplatek.`
-    : delta < 0
-      ? `Vaše nabídka je levnější o ${currency}${Math.abs(delta).toFixed(2)}. Výhodnější struktura nákladů nebo poplatků.`
-      : `Obě nabídky jsou cenově totožné.`;
-
   return (
     <div className="calculator-box">
-      <h1>SaaS & Payments fee comparator</h1>
-      <label>Zvolte měnu</label>
+      <h1>{copy.title}</h1>
+
+      <label>{copy.selectLanguage}</label>
+      <select value={lang} onChange={(e) => setLang(e.target.value)}>
+        <option value="cz">🇨🇿 Čeština</option>
+        <option value="en">🇬🇧 English</option>
+      </select>
+
+      <label>{copy.selectCurrency}</label>
       <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
         <option value="€">€</option>
         <option value="$">$</option>
@@ -75,26 +130,26 @@ export default function App() {
 
       <input type="file" accept=".json,.xlsx" onChange={handleImport} />
 
-      <label>TPV konkurence</label>
+      <label>{copy.labels.competitorTPV}</label>
       <input type="number" value={competitor.tpv} onChange={(e) => setCompetitor({ ...competitor, tpv: parseFloat(e.target.value) })} />
-      <label>Take rate konkurence (%)</label>
+      <label>{copy.labels.competitorTR}</label>
       <input type="number" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: parseFloat(e.target.value) })} />
-      <label>SaaS poplatek konkurence</label>
+      <label>{copy.labels.competitorSaaS}</label>
       <input type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: parseFloat(e.target.value) })} />
 
-      <label>Váš TPV</label>
+      <label>{copy.labels.ourTPV}</label>
       <input type="number" value={ours.tpv} onChange={(e) => setOurs({ ...ours, tpv: parseFloat(e.target.value) })} />
-      <label>Váš Take rate (%)</label>
+      <label>{copy.labels.ourTR}</label>
       <input type="number" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: parseFloat(e.target.value) })} />
-      <label>Váš SaaS poplatek</label>
+      <label>{copy.labels.ourSaaS}</label>
       <input type="number" value={ours.saasFee} onChange={(e) => setOurs({ ...ours, saasFee: parseFloat(e.target.value) })} />
 
       <div className="summary">
-        <h2>Výsledky</h2>
-        <p>Celková cena konkurence: {currency}{compTotal.toFixed(2)}</p>
-        <p>Vaše celková cena: {currency}{oursTotal.toFixed(2)}</p>
-        <p>Rozdíl: {currency}{delta.toFixed(2)}</p>
-        <p><strong>{description}</strong></p>
+        <h2>{copy.results.header}</h2>
+        <p>{copy.results.competitorTotal}: {currency}{compTotal.toFixed(2)}</p>
+        <p>{copy.results.ourTotal}: {currency}{oursTotal.toFixed(2)}</p>
+        <p>{copy.results.diff}: {currency}{delta.toFixed(2)}</p>
+        <p><strong>{copy.results.desc(delta, currency)}</strong></p>
       </div>
     </div>
   );
