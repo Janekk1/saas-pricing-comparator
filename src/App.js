@@ -58,53 +58,6 @@ export default function App() {
     }
   };
 
-  const copy = t[lang];
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    const ext = file.name.split('.').pop();
-
-    if (ext === 'json') {
-      reader.onload = (event) => {
-        try {
-          const data = JSON.parse(event.target.result);
-          setCompetitor(data.competitor);
-          setOurs(data.ours);
-        } catch {
-          alert("Invalid JSON file");
-        }
-      };
-      reader.readAsText(file);
-    } else if (ext === 'xlsx') {
-      reader.onload = (event) => {
-        try {
-          const data = new Uint8Array(event.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const sheet = workbook.Sheets[workbook.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-          const obj = {};
-          rows.forEach(([field, , value]) => {
-            obj[field] = value;
-          });
-          setCompetitor({
-            tpv: parseFloat(obj['competitor_tpv']),
-            takeRate: parseFloat(obj['competitor_take_rate']),
-            saasFee: parseFloat(obj['competitor_saas_fee'])
-          });
-          setOurs({
-            tpv: parseFloat(obj['our_tpv']),
-            takeRate: parseFloat(obj['our_take_rate']),
-            saasFee: parseFloat(obj['our_saas_fee'])
-          });
-        } catch {
-          alert("Invalid XLSX file");
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  };
-
   const calculate = ({ tpv, takeRate, saasFee }) => (tpv * takeRate) / 100 + saasFee;
   const compTotal = calculate(competitor);
   const oursTotal = calculate(ours);
