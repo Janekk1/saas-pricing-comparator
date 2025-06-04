@@ -14,32 +14,29 @@ body {
   border: 2px solid #f05a5a;
   border-radius: 16px;
   padding: 2rem;
-  max-width: 640px;
+  max-width: 500px;
   width: 100%;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 h1 {
   color: #f05a5a;
   margin-bottom: 1rem;
-  font-size: 1.6rem;
 }
 
-label {
-  display: block;
-  font-weight: 600;
-  margin-top: 1rem;
-  color: #333;
-}
-
-input,
-select {
+input, select {
   width: 100%;
-  padding: 8px 10px;
+  padding: 8px;
   margin: 6px 0 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 1rem;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 1rem;
 }
 
 .summary {
@@ -48,14 +45,4 @@ select {
   padding: 1rem;
   border-radius: 10px;
   border: 1px solid #f05a5a;
-}
-
-.summary h2 {
-  color: #f05a5a;
-  margin-bottom: 0.5rem;
-}
-
-.summary p {
-  margin: 0.4rem 0;
-  line-height: 1.4;
 }
