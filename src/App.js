@@ -19,7 +19,7 @@ export default function App() {
         ourTPV: "Vaše měsíční TPV",
         ourTR: "Náš Take rate (%)",
         ourSaaS: "Náš měsíční SAAS poplatek",
-        hwPrice: "Cena našeho nového HW"
+        hwPrice: "Cena nového HW"
       },
       results: {
         header: "Výsledky",
@@ -45,7 +45,7 @@ export default function App() {
         ourTPV: "Your monthly TPV",
         ourTR: "Our Take Rate (%)",
         ourSaaS: "Our monthly SaaS Fee",
-        hwPrice: "Price of our new hardware"
+        hwPrice: "Price of the new hardware"
       },
       results: {
         header: "Results",
