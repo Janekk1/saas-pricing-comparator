@@ -13,12 +13,12 @@ export default function App() {
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "Vaše TPV",
-        competitorTR: "Take rate konkurence (%)",
+        competitorTPV: "Měsíční karetní TPV podniku",
+        competitorTR: "IC++ Take rate konkurence (%)",
         competitorSaaS: "Měsíční SAAS poplatek konkurence",
-        ourTPV: "Vaše měsíční TPV",
-        ourTR: "Náš Take rate (%)",
-        ourSaaS: "Náš měsíční SAAS poplatek",
+        ourTPV: "Měsíční karetní TPV podniku",
+        ourTR: "Teya IC++ take rate (%)",
+        ourSaaS: "Storyous SAAS poplatek",
         hwPrice: "Cena nového HW"
       },
       results: {
@@ -39,12 +39,12 @@ export default function App() {
       selectCurrency: "Select Currency",
       selectLanguage: "Select Language",
       labels: {
-        competitorTPV: "Your monthly TPV",
+        competitorTPV: "Monthly card TPV",
         competitorTR: "Competitor Take Rate (%)",
         competitorSaaS: "Competitor monthly SAAS Fee",
-        ourTPV: "Your monthly TPV",
-        ourTR: "Our Take Rate (%)",
-        ourSaaS: "Our monthly SaaS Fee",
+        ourTPV: "Monthly card TPV",
+        ourTR: "Teya IC++ Take Rate (%)",
+        ourSaaS: "Storyous monthly SaaS Fee",
         hwPrice: "Price of the new hardware"
       },
       results: {
