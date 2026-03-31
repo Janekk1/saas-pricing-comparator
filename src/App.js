@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 
 export default function App() {
-  const [competitor, setCompetitor] = useState({ tpv: 100000, takeRate: 1.5, saasFee: 200, feePerTransaction: 0, numTransactions: 0 });
-  const [ours, setOurs] = useState({ tpv: 100000, takeRate: 1.2, saasFee: 250 });
+  const [tpv, setTpv] = useState(100000);
+  const [competitor, setCompetitor] = useState({ takeRate: 1.5, saasFee: 200, feePerTransaction: 0, avgTransactionValue: 0 });
+  const [ours, setOurs] = useState({ takeRate: 1.2, saasFee: 250 });
   const [currency, setCurrency] = useState("€");
   const [lang, setLang] = useState("cz");
   const [hwPrice, setHwPrice] = useState(0);
@@ -13,12 +14,11 @@ export default function App() {
       selectCurrency: "Zvolte měnu",
       selectLanguage: "Zvolte jazyk",
       labels: {
-        competitorTPV: "Měsíční karetní TPV podniku",
+        tpv: "Měsíční karetní TPV podniku",
         competitorTR: "IC++ Take rate konkurence (%)",
         competitorSaaS: "Měsíční SAAS poplatek konkurence",
+        competitorAvgTx: "Průměrná hodnota transakce – konkurence",
         competitorFeePerTx: "Poplatek za transakci – konkurence",
-        competitorNumTx: "Počet transakcí za měsíc – konkurence",
-        ourTPV: "Měsíční karetní TPV podniku",
         ourTR: "Teya IC++ take rate (%)",
         ourSaaS: "Storyous SAAS poplatek",
         hwPrice: "Cena nového HW"
@@ -41,12 +41,11 @@ export default function App() {
       selectCurrency: "Select Currency",
       selectLanguage: "Select Language",
       labels: {
-        competitorTPV: "Monthly card TPV",
+        tpv: "Monthly card TPV",
         competitorTR: "Competitor Take Rate (%)",
-        competitorSaaS: "Competitor monthly SAAS Fee",
+        competitorSaaS: "Competitor monthly SaaS Fee",
+        competitorAvgTx: "Average transaction value",
         competitorFeePerTx: "Competitor fee per transaction",
-        competitorNumTx: "Competitor monthly number of transactions",
-        ourTPV: "Monthly card TPV",
         ourTR: "Teya IC++ Take Rate (%)",
         ourSaaS: "Storyous monthly SaaS Fee",
         hwPrice: "Price of the new hardware"
@@ -68,9 +67,11 @@ export default function App() {
 
   const copy = t[lang];
 
-  const calculateCompetitor = ({ tpv, takeRate, saasFee, feePerTransaction, numTransactions }) =>
-    (tpv * takeRate) / 100 + saasFee + (feePerTransaction || 0) * (numTransactions || 0);
-  const calculate = ({ tpv, takeRate, saasFee }) => (tpv * takeRate) / 100 + saasFee;
+  const calculateCompetitor = ({ takeRate, saasFee, feePerTransaction, avgTransactionValue }) => {
+    const numTransactions = avgTransactionValue > 0 ? tpv / avgTransactionValue : 0;
+    return (tpv * takeRate) / 100 + saasFee + (feePerTransaction || 0) * numTransactions;
+  };
+  const calculate = ({ takeRate, saasFee }) => (tpv * takeRate) / 100 + saasFee;
 
   const compTotal = calculateCompetitor(competitor);
   const oursTotal = calculate(ours);
@@ -95,19 +96,18 @@ export default function App() {
         <option value="Kč">Kč</option>
       </select>
 
-      <label>{copy.labels.competitorTPV}</label>
-      <input type="number" value={competitor.tpv} onChange={(e) => setCompetitor({ ...competitor, tpv: parseFloat(e.target.value) })} />
+      <label>{copy.labels.tpv}</label>
+      <input type="number" value={tpv} onChange={(e) => setTpv(parseFloat(e.target.value) || 0)} />
+
       <label>{copy.labels.competitorTR}</label>
       <input type="number" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: parseFloat(e.target.value) })} />
       <label>{copy.labels.competitorSaaS}</label>
       <input type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: parseFloat(e.target.value) })} />
+      <label>{copy.labels.competitorAvgTx}</label>
+      <input type="number" value={competitor.avgTransactionValue} onChange={(e) => setCompetitor({ ...competitor, avgTransactionValue: parseFloat(e.target.value) || 0 })} />
       <label>{copy.labels.competitorFeePerTx}</label>
       <input type="number" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: parseFloat(e.target.value) || 0 })} />
-      <label>{copy.labels.competitorNumTx}</label>
-      <input type="number" value={competitor.numTransactions} onChange={(e) => setCompetitor({ ...competitor, numTransactions: parseFloat(e.target.value) || 0 })} />
 
-      <label>{copy.labels.ourTPV}</label>
-      <input type="number" value={ours.tpv} onChange={(e) => setOurs({ ...ours, tpv: parseFloat(e.target.value) })} />
       <label>{copy.labels.ourTR}</label>
       <input type="number" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: parseFloat(e.target.value) })} />
       <label>{copy.labels.ourSaaS}</label>
