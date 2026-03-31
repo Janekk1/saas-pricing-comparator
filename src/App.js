@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export default function App() {
-  const [competitor, setCompetitor] = useState({ tpv: 100000, takeRate: 1.5, saasFee: 200 });
+  const [competitor, setCompetitor] = useState({ tpv: 100000, takeRate: 1.5, saasFee: 200, feePerTransaction: 0, numTransactions: 0 });
   const [ours, setOurs] = useState({ tpv: 100000, takeRate: 1.2, saasFee: 250 });
   const [currency, setCurrency] = useState("€");
   const [lang, setLang] = useState("cz");
@@ -16,6 +16,8 @@ export default function App() {
         competitorTPV: "Měsíční karetní TPV podniku",
         competitorTR: "IC++ Take rate konkurence (%)",
         competitorSaaS: "Měsíční SAAS poplatek konkurence",
+        competitorFeePerTx: "Poplatek za transakci – konkurence",
+        competitorNumTx: "Počet transakcí za měsíc – konkurence",
         ourTPV: "Měsíční karetní TPV podniku",
         ourTR: "Teya IC++ take rate (%)",
         ourSaaS: "Storyous SAAS poplatek",
@@ -42,6 +44,8 @@ export default function App() {
         competitorTPV: "Monthly card TPV",
         competitorTR: "Competitor Take Rate (%)",
         competitorSaaS: "Competitor monthly SAAS Fee",
+        competitorFeePerTx: "Competitor fee per transaction",
+        competitorNumTx: "Competitor monthly number of transactions",
         ourTPV: "Monthly card TPV",
         ourTR: "Teya IC++ Take Rate (%)",
         ourSaaS: "Storyous monthly SaaS Fee",
@@ -64,8 +68,11 @@ export default function App() {
 
   const copy = t[lang];
 
+  const calculateCompetitor = ({ tpv, takeRate, saasFee, feePerTransaction, numTransactions }) =>
+    (tpv * takeRate) / 100 + saasFee + (feePerTransaction || 0) * (numTransactions || 0);
   const calculate = ({ tpv, takeRate, saasFee }) => (tpv * takeRate) / 100 + saasFee;
-  const compTotal = calculate(competitor);
+
+  const compTotal = calculateCompetitor(competitor);
   const oursTotal = calculate(ours);
   const delta = oursTotal - compTotal;
   const payback = delta < 0 && hwPrice > 0 ? Math.ceil(hwPrice / Math.abs(delta)) : null;
@@ -94,6 +101,10 @@ export default function App() {
       <input type="number" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: parseFloat(e.target.value) })} />
       <label>{copy.labels.competitorSaaS}</label>
       <input type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: parseFloat(e.target.value) })} />
+      <label>{copy.labels.competitorFeePerTx}</label>
+      <input type="number" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: parseFloat(e.target.value) || 0 })} />
+      <label>{copy.labels.competitorNumTx}</label>
+      <input type="number" value={competitor.numTransactions} onChange={(e) => setCompetitor({ ...competitor, numTransactions: parseFloat(e.target.value) || 0 })} />
 
       <label>{copy.labels.ourTPV}</label>
       <input type="number" value={ours.tpv} onChange={(e) => setOurs({ ...ours, tpv: parseFloat(e.target.value) })} />
