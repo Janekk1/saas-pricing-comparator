@@ -215,3 +215,6 @@ input:disabled { background: var(--track); color: var(--muted); }
 }
 .chart-box { width: 100%; min-width: 560px; }
 .chart { width: auto; max-width: none; min-width: 0; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.grid-4 > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+@media (max-width: 1000px) { .grid-4 { grid-template-columns: 1fr 1fr; } }

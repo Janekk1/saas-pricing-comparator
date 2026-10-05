@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MonthlySimulation from "./MonthlySimulation";
-import { DEFAULT_SIM, computeSimulation, isSimCustomised } from "./simulation";
+import { DEFAULT_SIM, computeSimulation, isSimCustomised, readNum } from "./simulation";
 import { detectDefaults } from "./locale";
 
 const fmt = (n) => (Number.isFinite(n) ? n : 0).toLocaleString("cs-CZ", { maximumFractionDigits: 0 });
@@ -22,7 +22,7 @@ const T = {
       avgTx: "Průměrná hodnota transakce",
       feePerTx: "Poplatek za transakci",
     },
-    saasFromSim: "Průměr z roční simulace (licence + zařízení)",
+    saasFromSim: "Průměr z roční simulace (SaaS + licence)",
     results: {
       saving: "Měsíční úspora klienta",
       extra: "Měsíční navýšení pro klienta",
@@ -54,7 +54,7 @@ const T = {
       avgTx: "Priemerná hodnota transakcie",
       feePerTx: "Poplatok za transakciu",
     },
-    saasFromSim: "Priemer z ročnej simulácie (licencia + zariadenia)",
+    saasFromSim: "Priemer z ročnej simulácie (SaaS + licencie)",
     results: {
       saving: "Mesačná úspora klienta",
       extra: "Mesačné navýšenie pre klienta",
@@ -86,7 +86,7 @@ const T = {
       avgTx: "Average transaction value",
       feePerTx: "Fee per transaction",
     },
-    saasFromSim: "Average from the yearly simulation (licence + devices)",
+    saasFromSim: "Average from the yearly simulation (SaaS + licences)",
     results: {
       saving: "Client's monthly saving",
       extra: "Client's monthly extra cost",
@@ -127,10 +127,6 @@ export default function App() {
   const [simOpen, setSimOpen] = useState(false);
 
   const copy = T[lang];
-  const pf = (v) => {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : 0;
-  };
 
   // The results are the monthly average of the yearly simulation.
   // With default simulation settings (100 % every month, flat SaaS) this equals the simple one-month calculation.
@@ -175,27 +171,27 @@ export default function App() {
           <div className="panel">
             <div className="eyebrow">{copy.client}</div>
             <Field id="tpv" label={`${copy.labels.tpv} (${currency})`}>
-              <input id="tpv" type="number" value={tpv} onChange={(e) => setTpv(pf(e.target.value))} />
+              <input id="tpv" type="number" value={tpv} onChange={(e) => setTpv(readNum(e))} />
             </Field>
             <Field id="hw" label={`${copy.labels.hwPrice} (${currency})`}>
-              <input id="hw" type="number" value={hwPrice} onChange={(e) => setHwPrice(pf(e.target.value))} />
+              <input id="hw" type="number" value={hwPrice} onChange={(e) => setHwPrice(readNum(e))} />
             </Field>
           </div>
 
           <div className="panel">
             <div className="eyebrow"><span className="dot s2" />{copy.competitor}</div>
             <Field id="c-tr" label={copy.labels.takeRate}>
-              <input id="c-tr" type="number" step="0.1" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: pf(e.target.value) })} />
+              <input id="c-tr" type="number" step="0.1" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: readNum(e) })} />
             </Field>
             <Field id="c-saas" label={`${copy.labels.saas} (${currency})`}>
-              <input id="c-saas" type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: pf(e.target.value) })} />
+              <input id="c-saas" type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: readNum(e) })} />
             </Field>
             <div className="field-pair">
               <Field id="c-avg" label={`${copy.labels.avgTx} (${currency})`}>
-                <input id="c-avg" type="number" value={competitor.avgTransactionValue} onChange={(e) => setCompetitor({ ...competitor, avgTransactionValue: pf(e.target.value) })} />
+                <input id="c-avg" type="number" value={competitor.avgTransactionValue} onChange={(e) => setCompetitor({ ...competitor, avgTransactionValue: readNum(e) })} />
               </Field>
               <Field id="c-fee" label={`${copy.labels.feePerTx} (${currency})`}>
-                <input id="c-fee" type="number" step="0.01" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: pf(e.target.value) })} />
+                <input id="c-fee" type="number" step="0.01" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: readNum(e) })} />
               </Field>
             </div>
           </div>
@@ -203,13 +199,13 @@ export default function App() {
           <div className="panel">
             <div className="eyebrow"><span className="dot s1" />{copy.ours}</div>
             <Field id="o-tr" label={copy.labels.takeRate}>
-              <input id="o-tr" type="number" step="0.1" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: pf(e.target.value) })} />
+              <input id="o-tr" type="number" step="0.1" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: readNum(e) })} />
             </Field>
             <Field id="o-saas" label={`${copy.labels.saas} (${currency})`} hint={deviceMode ? copy.saasFromSim : null}>
               {deviceMode ? (
                 <input id="o-saas" type="number" value={Math.round(result.avg.saas)} disabled />
               ) : (
-                <input id="o-saas" type="number" value={ours.saasFee} onChange={(e) => setOurs({ ...ours, saasFee: pf(e.target.value) })} />
+                <input id="o-saas" type="number" value={ours.saasFee} onChange={(e) => setOurs({ ...ours, saasFee: readNum(e) })} />
               )}
             </Field>
           </div>

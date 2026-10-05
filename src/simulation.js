@@ -4,9 +4,10 @@ export const DEFAULT_SIM = {
   season: Array(12).fill(100), // % of base TPV per month (80–120)
   saasMode: "flat", // "flat" | "device"
   saasOverride: Array(12).fill(null), // flat mode: per-month SaaS fee (null = use base fee)
-  platformFee: 100, // device mode: monthly fee for everything not tied to devices
-  pricePerDevice: 30, // device mode: monthly price per device
-  devices: 2, // device mode: default number of devices
+  platformFee: 100, // licence mode: monthly SaaS excluding licences
+  firstLicence: 30, // licence mode: monthly price of the first licence
+  otherLicence: 20, // licence mode: monthly price of each additional licence
+  devices: 2, // licence mode: default number of licences
   deviceOverride: Array(12).fill(null), // device mode: per-month device count (null = default)
   years: 1,
   growth: 0, // yearly TPV growth in %
@@ -30,9 +31,15 @@ export function devicesFor(sim, m) {
   return sim.deviceOverride[m] ?? sim.devices;
 }
 
+export function licenceCost(sim, count) {
+  const n = Math.max(0, num(count));
+  if (n === 0) return 0;
+  return num(sim.firstLicence) + (n - 1) * num(sim.otherLicence);
+}
+
 export function saasFor(sim, m, baseSaas) {
   if (sim.saasMode === "device") {
-    return num(sim.platformFee) + num(devicesFor(sim, m)) * num(sim.pricePerDevice);
+    return num(sim.platformFee) + licenceCost(sim, devicesFor(sim, m));
   }
   return sim.saasOverride[m] ?? num(baseSaas);
 }
@@ -81,4 +88,13 @@ export function computeSimulation({ tpv, competitor, ours, hwPrice, sim, start =
   };
 
   return { rows, yearly, totals, avg, paybackMonth };
+}
+
+// Reads a number input and removes leading zeros the browser keeps on screen (e.g. "0800" -> "800").
+export function readNum(e) {
+  const raw = e.target.value;
+  const clean = raw.replace(/^(-?)0+(?=\d)/, "$1");
+  if (clean !== raw) e.target.value = clean;
+  const n = parseFloat(clean);
+  return Number.isFinite(n) ? n : 0;
 }

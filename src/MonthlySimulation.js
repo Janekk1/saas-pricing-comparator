@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { RESTAURANT_PRESET, DEFAULT_SIM, devicesFor } from "./simulation";
+import { RESTAURANT_PRESET, DEFAULT_SIM, devicesFor, readNum } from "./simulation";
 
 const MONTHS = {
   cz: ["Led", "Úno", "Bře", "Dub", "Kvě", "Čvn", "Čvc", "Srp", "Zář", "Říj", "Lis", "Pro"],
@@ -22,18 +22,19 @@ const TEXT = {
     saasGroup: "Storyous SAAS",
     saasMode: "Model účtování",
     modeFlat: "Fixní měsíční poplatek",
-    modeDevice: "Licence + cena za zařízení",
-    platformFee: "Licence bez zařízení / měsíc",
-    platformHint: "funkce nezávislé na počtu zařízení",
-    pricePerDevice: "Cena za 1 zařízení / měsíc",
-    defaultDevices: "Počet zařízení",
-    saasFormula: (p, d, n, cur) => `${fmt(p)} + ${fmt(n)} × ${fmt(d)} = ${fmt(p + n * d)} ${cur} / měsíc`,
+    modeDevice: "SaaS + licence",
+    platformFee: "SaaS bez licencí",
+    platformHint: "Měsíčně: SaaS bez licencí + 1. licence + další licence",
+    firstLicence: "Cena 1. licence",
+    otherLicence: "Cena další licence",
+    defaultDevices: "Počet licencí",
+    saasFormula: (p, f, o, n, cur) => formula(p, f, o, n, cur, "měsíc"),
     resetSeason: "Sezónnost na 100 %",
     restaurantPreset: "Typická gastro sezóna",
     month: "Měsíc",
     season: "Sezónnost",
     tpv: "TPV",
-    devices: "Zařízení",
+    devices: "Licence",
     saas: "Storyous SAAS",
     competitor: "Konkurence",
     ours: "Storyous + Teya",
@@ -68,18 +69,19 @@ const TEXT = {
     saasGroup: "Storyous SAAS",
     saasMode: "Model účtovania",
     modeFlat: "Fixný mesačný poplatok",
-    modeDevice: "Licencia + cena za zariadenie",
-    platformFee: "Licencia bez zariadení / mesiac",
-    platformHint: "funkcie nezávislé od počtu zariadení",
-    pricePerDevice: "Cena za 1 zariadenie / mesiac",
-    defaultDevices: "Počet zariadení",
-    saasFormula: (p, d, n, cur) => `${fmt(p)} + ${fmt(n)} × ${fmt(d)} = ${fmt(p + n * d)} ${cur} / mesiac`,
+    modeDevice: "SaaS + licencie",
+    platformFee: "SaaS bez licencií",
+    platformHint: "Mesačne: SaaS bez licencií + 1. licencia + ďalšie licencie",
+    firstLicence: "Cena 1. licencie",
+    otherLicence: "Cena ďalšej licencie",
+    defaultDevices: "Počet licencií",
+    saasFormula: (p, f, o, n, cur) => formula(p, f, o, n, cur, "mesiac"),
     resetSeason: "Sezónnosť na 100 %",
     restaurantPreset: "Typická gastro sezóna",
     month: "Mesiac",
     season: "Sezónnosť",
     tpv: "TPV",
-    devices: "Zariadenia",
+    devices: "Licencie",
     saas: "Storyous SAAS",
     competitor: "Konkurencia",
     ours: "Storyous + Teya",
@@ -114,18 +116,19 @@ const TEXT = {
     saasGroup: "Storyous SaaS",
     saasMode: "Billing model",
     modeFlat: "Flat monthly fee",
-    modeDevice: "Licence + price per device",
-    platformFee: "Licence without devices / month",
-    platformHint: "features not tied to the number of devices",
-    pricePerDevice: "Price per device / month",
-    defaultDevices: "Number of devices",
-    saasFormula: (p, d, n, cur) => `${fmt(p)} + ${fmt(n)} × ${fmt(d)} = ${fmt(p + n * d)} ${cur} / month`,
+    modeDevice: "SaaS + licences",
+    platformFee: "SaaS excl. licences",
+    platformHint: "Monthly: SaaS excl. licences + first licence + extra licences",
+    firstLicence: "First licence",
+    otherLicence: "Each extra licence",
+    defaultDevices: "Number of licences",
+    saasFormula: (p, f, o, n, cur) => formula(p, f, o, n, cur, "month"),
     resetSeason: "Seasonality to 100%",
     restaurantPreset: "Typical restaurant season",
     month: "Month",
     season: "Seasonality",
     tpv: "TPV",
-    devices: "Devices",
+    devices: "Licences",
     saas: "Storyous SaaS",
     competitor: "Competitor",
     ours: "Storyous + Teya",
@@ -147,6 +150,15 @@ const TEXT = {
     noPayback: (hw, cur) => `The hardware investment (${fmt(hw)} ${cur}) does not pay back in this period.`,
   },
 };
+
+function formula(p, f, o, n, cur, per) {
+  const count = Math.max(0, n || 0);
+  const parts = [fmt(p)];
+  if (count >= 1) parts.push(fmt(f));
+  if (count >= 2) parts.push(`${fmt(count - 1)} × ${fmt(o)}`);
+  const total = (p || 0) + (count >= 1 ? f || 0 : 0) + Math.max(0, count - 1) * (o || 0);
+  return `${parts.join(" + ")} = ${fmt(total)} ${cur} / ${per}`;
+}
 
 function fmt(n) {
   return (Number.isFinite(n) ? n : 0).toLocaleString("cs-CZ", { maximumFractionDigits: 0 });
@@ -170,11 +182,6 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
       next[i] = value;
       return { ...s, [key]: next };
     });
-  const pf = (v) => {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : 0;
-  };
-
   const firstYear = rows.slice(0, 12);
   const deviceMode = sim.saasMode === "device";
 
@@ -203,7 +210,7 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
                 </div>
                 <div>
                   <label htmlFor="sim-growth">{tx.growth}</label>
-                  <input id="sim-growth" type="number" value={sim.growth} onChange={(e) => update({ growth: pf(e.target.value) })} />
+                  <input id="sim-growth" type="number" value={sim.growth} onChange={(e) => update({ growth: readNum(e) })} />
                 </div>
               </div>
               <div className="btn-row">
@@ -225,14 +232,10 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
               </div>
               {deviceMode && (
                 <>
-                  <div className="grid-3">
+                  <div className="grid-4">
                     <div>
                       <label htmlFor="sim-platform">{tx.platformFee}</label>
-                      <input id="sim-platform" type="number" value={sim.platformFee} onChange={(e) => update({ platformFee: pf(e.target.value) })} />
-                    </div>
-                    <div>
-                      <label htmlFor="sim-ppd">{tx.pricePerDevice}</label>
-                      <input id="sim-ppd" type="number" value={sim.pricePerDevice} onChange={(e) => update({ pricePerDevice: pf(e.target.value) })} />
+                      <input id="sim-platform" type="number" min="0" value={sim.platformFee} onChange={(e) => update({ platformFee: readNum(e) })} />
                     </div>
                     <div>
                       <label htmlFor="sim-devices">{tx.defaultDevices}</label>
@@ -241,13 +244,21 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
                         type="number"
                         min="0"
                         value={sim.devices}
-                        onChange={(e) => update({ devices: pf(e.target.value), deviceOverride: Array(12).fill(null) })}
+                        onChange={(e) => update({ devices: readNum(e), deviceOverride: Array(12).fill(null) })}
                       />
+                    </div>
+                    <div>
+                      <label htmlFor="sim-first">{tx.firstLicence}</label>
+                      <input id="sim-first" type="number" min="0" value={sim.firstLicence} onChange={(e) => update({ firstLicence: readNum(e) })} />
+                    </div>
+                    <div>
+                      <label htmlFor="sim-other">{tx.otherLicence}</label>
+                      <input id="sim-other" type="number" min="0" value={sim.otherLicence} onChange={(e) => update({ otherLicence: readNum(e) })} />
                     </div>
                   </div>
                   <p className="formula">
                     <span className="muted">{tx.platformHint}</span>
-                    <strong>{tx.saasFormula(sim.platformFee, sim.pricePerDevice, sim.devices, currency)}</strong>
+                    <strong>{tx.saasFormula(sim.platformFee, sim.firstLicence, sim.otherLicence, sim.devices, currency)}</strong>
                   </p>
                 </>
               )}
@@ -295,7 +306,7 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
                           min="0"
                           className="cell-input narrow"
                           value={devicesFor(sim, r.m)}
-                          onChange={(e) => updateAt("deviceOverride", r.m, pf(e.target.value))}
+                          onChange={(e) => updateAt("deviceOverride", r.m, readNum(e))}
                         />
                       </td>
                     )}
@@ -307,7 +318,7 @@ export default function MonthlySimulation({ lang, currency, ours, hwPrice, sim, 
                           type="number"
                           className="cell-input"
                           value={sim.saasOverride[r.m] ?? ours.saasFee}
-                          onChange={(e) => updateAt("saasOverride", r.m, pf(e.target.value))}
+                          onChange={(e) => updateAt("saasOverride", r.m, readNum(e))}
                         />
                       )}
                     </td>
