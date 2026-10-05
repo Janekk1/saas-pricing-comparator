@@ -37,14 +37,18 @@ export function saasFor(sim, m, baseSaas) {
   return sim.saasOverride[m] ?? num(baseSaas);
 }
 
-export function computeSimulation({ tpv, competitor, ours, hwPrice, sim }) {
+export function computeSimulation({ tpv, competitor, ours, hwPrice, sim, start = new Date() }) {
+  // The simulation starts in the current calendar month and runs forward; seasonality follows calendar months.
+  const startMonth = start.getMonth();
+  const startYear = start.getFullYear();
   const monthlyGrowth = Math.pow(1 + num(sim.growth) / 100, 1 / 12) - 1;
   const rows = [];
   let cumulative = 0;
   let paybackMonth = null;
 
   for (let i = 0; i < sim.years * 12; i++) {
-    const m = i % 12;
+    const m = (startMonth + i) % 12;
+    const calYear = startYear + Math.floor((startMonth + i) / 12);
     const monthTpv = num(tpv) * (sim.season[m] / 100) * Math.pow(1 + monthlyGrowth, i);
     const txCount = competitor.avgTransactionValue > 0 ? monthTpv / competitor.avgTransactionValue : 0;
     const compRate = (monthTpv * num(competitor.takeRate)) / 100;
@@ -55,7 +59,7 @@ export function computeSimulation({ tpv, competitor, ours, hwPrice, sim }) {
     const saving = compCost - ourCost;
     cumulative += saving;
     if (paybackMonth === null && hwPrice > 0 && cumulative >= hwPrice) paybackMonth = i + 1;
-    rows.push({ i, m, year: Math.floor(i / 12) + 1, monthTpv, compRate, compCost, ourRate, ourSaas, ourCost, saving, cumulative });
+    rows.push({ i, m, calYear, year: Math.floor(i / 12) + 1, monthTpv, compRate, compCost, ourRate, ourSaas, ourCost, saving, cumulative });
   }
 
   const sum = (list, key) => list.reduce((a, r) => a + r[key], 0);

@@ -1,210 +1,262 @@
 import React, { useState } from "react";
 import MonthlySimulation from "./MonthlySimulation";
 import { DEFAULT_SIM, computeSimulation, isSimCustomised } from "./simulation";
+import { detectDefaults } from "./locale";
+
+const fmt = (n) => (Number.isFinite(n) ? n : 0).toLocaleString("cs-CZ", { maximumFractionDigits: 0 });
+
+const T = {
+  cz: {
+    title: "SAAS & Payments kalkulačka",
+    eyebrow: "Storyous + Teya",
+    language: "Jazyk",
+    currency: "Měna",
+    client: "Klient",
+    competitor: "Konkurence",
+    ours: "Storyous + Teya",
+    labels: {
+      tpv: "Měsíční karetní TPV",
+      hwPrice: "Cena nového HW",
+      takeRate: "IC++ take rate (%)",
+      saas: "Měsíční SAAS poplatek",
+      avgTx: "Průměrná hodnota transakce",
+      feePerTx: "Poplatek za transakci",
+    },
+    saasFromSim: "Průměr z roční simulace (licence + zařízení)",
+    results: {
+      saving: "Měsíční úspora klienta",
+      extra: "Měsíční navýšení pro klienta",
+      equal: "Obě nabídky stojí stejně",
+      compMonth: "Konkurence / měsíc",
+      oursMonth: "Storyous + Teya / měsíc",
+      yearSaving: "Úspora za 12 měsíců",
+      payback: (m) => `HW se vrátí za ${m} měs.`,
+      avgNote: (y) => `Měsíční průměr z roční simulace (${y === 1 ? "1 rok" : y + " roky"})`,
+      avgTpv: "průměrné TPV",
+      perMonth: "měsíčně",
+      cheaper: (d, cur) => `Naše nabídka je levnější o ${fmt(d)} ${cur} měsíčně.`,
+      dearer: (d, cur) => `Naše nabídka je dražší o ${fmt(d)} ${cur} měsíčně.`,
+    },
+  },
+  sk: {
+    title: "SAAS & Payments kalkulačka",
+    eyebrow: "Storyous + Teya",
+    language: "Jazyk",
+    currency: "Mena",
+    client: "Klient",
+    competitor: "Konkurencia",
+    ours: "Storyous + Teya",
+    labels: {
+      tpv: "Mesačné kartové TPV",
+      hwPrice: "Cena nového HW",
+      takeRate: "IC++ take rate (%)",
+      saas: "Mesačný SAAS poplatok",
+      avgTx: "Priemerná hodnota transakcie",
+      feePerTx: "Poplatok za transakciu",
+    },
+    saasFromSim: "Priemer z ročnej simulácie (licencia + zariadenia)",
+    results: {
+      saving: "Mesačná úspora klienta",
+      extra: "Mesačné navýšenie pre klienta",
+      equal: "Obe ponuky stoja rovnako",
+      compMonth: "Konkurencia / mesiac",
+      oursMonth: "Storyous + Teya / mesiac",
+      yearSaving: "Úspora za 12 mesiacov",
+      payback: (m) => `HW sa vráti za ${m} mes.`,
+      avgNote: (y) => `Mesačný priemer z ročnej simulácie (${y === 1 ? "1 rok" : y + " roky"})`,
+      avgTpv: "priemerné TPV",
+      perMonth: "mesačne",
+      cheaper: (d, cur) => `Naša ponuka je lacnejšia o ${fmt(d)} ${cur} mesačne.`,
+      dearer: (d, cur) => `Naša ponuka je drahšia o ${fmt(d)} ${cur} mesačne.`,
+    },
+  },
+  en: {
+    title: "SaaS & Payments calculator",
+    eyebrow: "Storyous + Teya",
+    language: "Language",
+    currency: "Currency",
+    client: "Client",
+    competitor: "Competitor",
+    ours: "Storyous + Teya",
+    labels: {
+      tpv: "Monthly card TPV",
+      hwPrice: "New hardware price",
+      takeRate: "IC++ take rate (%)",
+      saas: "Monthly SaaS fee",
+      avgTx: "Average transaction value",
+      feePerTx: "Fee per transaction",
+    },
+    saasFromSim: "Average from the yearly simulation (licence + devices)",
+    results: {
+      saving: "Client's monthly saving",
+      extra: "Client's monthly extra cost",
+      equal: "Both offers cost the same",
+      compMonth: "Competitor / month",
+      oursMonth: "Storyous + Teya / month",
+      yearSaving: "Saving over 12 months",
+      payback: (m) => `Hardware pays back in ${m} mo.`,
+      avgNote: (y) => `Monthly average of the yearly simulation (${y === 1 ? "1 year" : y + " years"})`,
+      avgTpv: "average TPV",
+      perMonth: "per month",
+      cheaper: (d, cur) => `Our offer is cheaper by ${fmt(d)} ${cur} per month.`,
+      dearer: (d, cur) => `Our offer is more expensive by ${fmt(d)} ${cur} per month.`,
+    },
+  },
+};
+
+const DEFAULTS = detectDefaults();
+
+function Field({ id, label, children, hint }) {
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      {children}
+      {hint && <small className="hint">{hint}</small>}
+    </div>
+  );
+}
 
 export default function App() {
   const [tpv, setTpv] = useState(100000);
   const [competitor, setCompetitor] = useState({ takeRate: 1.5, saasFee: 200, feePerTransaction: 0, avgTransactionValue: 0 });
   const [ours, setOurs] = useState({ takeRate: 1.2, saasFee: 250 });
-  const [currency, setCurrency] = useState("€");
-  const [lang, setLang] = useState("cz");
+  const [currency, setCurrency] = useState(DEFAULTS.currency);
+  const [lang, setLang] = useState(DEFAULTS.lang);
   const [hwPrice, setHwPrice] = useState(0);
   const [sim, setSim] = useState(DEFAULT_SIM);
   const [simOpen, setSimOpen] = useState(false);
 
-  const t = {
-    cz: {
-      title: "SAAS & Payments Kalkulačka",
-      selectCurrency: "Zvolte měnu",
-      selectLanguage: "Zvolte jazyk",
-      labels: {
-        tpv: "Měsíční karetní TPV podniku",
-        competitorTR: "IC++ Take rate konkurence (%)",
-        competitorSaaS: "Měsíční SAAS poplatek konkurence",
-        competitorAvgTx: "Průměrná hodnota transakce – konkurence",
-        competitorFeePerTx: "Poplatek za transakci – konkurence",
-        ourTR: "Teya IC++ take rate (%)",
-        ourSaaS: "Storyous SAAS poplatek",
-        hwPrice: "Cena nového HW"
-      },
-      saasFromSim: "Průměr z roční simulace (licence + zařízení)",
-      results: {
-        header: "Výsledky",
-        avgNote: (y) => `Měsíční průměr z roční simulace (${y === 1 ? "1 rok" : y + " roky"})`,
-        avgTpv: "průměrné TPV",
-        competitorTotal: "Celková cena konkurence",
-        ourTotal: "Naše celková cena",
-        diff: "Rozdíl",
-        desc: (delta, payback) => delta < 0
-          ? `Naše nabídka je levnější o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.` +
-            (payback ? ` Investice do HW (${hwPrice.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}) se vrátí za ${payback} měsíců.` : "")
-          : delta > 0
-          ? `Naše nabídka je dražší o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.`
-          : `Obě nabídky jsou cenově totožné.`
-      }
-    },
-    sk: {
-      title: "SAAS & Payments Kalkulačka",
-      selectCurrency: "Zvoľte menu",
-      selectLanguage: "Zvoľte jazyk",
-      labels: {
-        tpv: "Mesačné kartové TPV prevádzky",
-        competitorTR: "IC++ Take rate konkurencie (%)",
-        competitorSaaS: "Mesačný SAAS poplatok konkurencie",
-        competitorAvgTx: "Priemerná hodnota transakcie – konkurencia",
-        competitorFeePerTx: "Poplatok za transakciu – konkurencia",
-        ourTR: "Teya IC++ take rate (%)",
-        ourSaaS: "Storyous SAAS poplatok",
-        hwPrice: "Cena nového HW"
-      },
-      saasFromSim: "Priemer z ročnej simulácie (licencia + zariadenia)",
-      results: {
-        header: "Výsledky",
-        avgNote: (y) => `Mesačný priemer z ročnej simulácie (${y === 1 ? "1 rok" : y + " roky"})`,
-        avgTpv: "priemerné TPV",
-        competitorTotal: "Celková cena konkurencie",
-        ourTotal: "Naša celková cena",
-        diff: "Rozdiel",
-        desc: (delta, payback) => delta < 0
-          ? `Naša ponuka je lacnejšia o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.` +
-            (payback ? ` Investícia do HW (${hwPrice.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}) sa vráti za ${payback} mesiacov.` : "")
-          : delta > 0
-          ? `Naša ponuka je drahšia o ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.`
-          : `Obe ponuky sú cenovo rovnaké.`
-      }
-    },
-    en: {
-      title: "SAAS & Payments Calculator",
-      selectCurrency: "Select Currency",
-      selectLanguage: "Select Language",
-      labels: {
-        tpv: "Monthly card TPV",
-        competitorTR: "Competitor Take Rate (%)",
-        competitorSaaS: "Competitor monthly SaaS Fee",
-        competitorAvgTx: "Average transaction value",
-        competitorFeePerTx: "Competitor fee per transaction",
-        ourTR: "Teya IC++ Take Rate (%)",
-        ourSaaS: "Storyous monthly SaaS Fee",
-        hwPrice: "Price of the new hardware"
-      },
-      saasFromSim: "Average from the yearly simulation (licence + devices)",
-      results: {
-        header: "Results",
-        avgNote: (y) => `Monthly average from the yearly simulation (${y === 1 ? "1 year" : y + " years"})`,
-        avgTpv: "average TPV",
-        competitorTotal: "Competitor Total fee",
-        ourTotal: "Our Total fee",
-        diff: "Difference",
-        desc: (delta, payback) => delta < 0
-          ? `Our offer is cheaper by ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.` +
-            (payback ? ` The hardware investment (${hwPrice.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}) pays back in ${payback} months.` : "")
-          : delta > 0
-          ? `Our offer is more expensive by ${Math.abs(delta).toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} ${currency}.`
-          : `Both offers cost the same.`
-      }
-    }
+  const copy = T[lang];
+  const pf = (v) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
   };
 
-  const copy = t[lang];
-
-  // The top results are the monthly average of the yearly simulation.
+  // The results are the monthly average of the yearly simulation.
   // With default simulation settings (100 % every month, flat SaaS) this equals the simple one-month calculation.
   const result = computeSimulation({ tpv, competitor, ours, hwPrice: hwPrice || 0, sim });
   const simActive = isSimCustomised(sim);
   const compTotal = result.avg.comp;
   const oursTotal = result.avg.ours;
-  const delta = oursTotal - compTotal;
-  const payback = delta < 0 && hwPrice > 0 ? Math.ceil(hwPrice / Math.abs(delta)) : null;
+  const saving = compTotal - oursTotal;
+  const yearSaving = result.yearly[0] ? result.yearly[0].saving : saving * 12;
+  const payback = saving > 0 && hwPrice > 0 ? Math.ceil(hwPrice / saving) : null;
   const deviceMode = sim.saasMode === "device";
 
   return (
-    <div className="calculator-box">
-      <h1>{copy.title}</h1>
-
-      <div className="form-grid">
-        <div>
-          <label>{copy.selectLanguage}</label>
-          <select value={lang} onChange={(e) => setLang(e.target.value)}>
-            <option value="cz">🇨🇿 Čeština</option>
-            <option value="sk">🇸🇰 Slovenčina</option>
-            <option value="en">🇬🇧 English</option>
-          </select>
+    <div className="app">
+      <header className="topbar">
+        <div className="brand">
+          <div className="logo" aria-hidden="true">ST</div>
+          <div>
+            <div className="bsub">{copy.eyebrow}</div>
+            <h1>{copy.title}</h1>
+          </div>
         </div>
-        <div>
-          <label>{copy.selectCurrency}</label>
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-            <option value="€">€</option>
-            <option value="$">$</option>
-            <option value="£">£</option>
+        <div className="top-controls">
+          <label className="sr" htmlFor="lang">{copy.language}</label>
+          <select id="lang" value={lang} onChange={(e) => setLang(e.target.value)}>
+            <option value="cz">Čeština</option>
+            <option value="sk">Slovenčina</option>
+            <option value="en">English</option>
+          </select>
+          <label className="sr" htmlFor="currency">{copy.currency}</label>
+          <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
             <option value="Kč">Kč</option>
+            <option value="€">€</option>
+            <option value="£">£</option>
+            <option value="$">$</option>
           </select>
         </div>
-        <div className="full">
-          <label>{copy.labels.tpv}</label>
-          <input type="number" value={tpv} onChange={(e) => setTpv(parseFloat(e.target.value) || 0)} />
-        </div>
+      </header>
 
-        <div>
-          <label>{copy.labels.competitorTR}</label>
-          <input type="number" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: parseFloat(e.target.value) })} />
-        </div>
-        <div>
-          <label>{copy.labels.ourTR}</label>
-          <input type="number" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: parseFloat(e.target.value) })} />
-        </div>
-        <div>
-          <label>{copy.labels.competitorSaaS}</label>
-          <input type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: parseFloat(e.target.value) })} />
-        </div>
-        <div>
-          <label>{copy.labels.ourSaaS}</label>
-          {deviceMode ? (
-            <>
-              <input type="number" value={Math.round(result.avg.saas)} disabled />
-              <small className="hint">{copy.saasFromSim}</small>
-            </>
-          ) : (
-            <input type="number" value={ours.saasFee} onChange={(e) => setOurs({ ...ours, saasFee: parseFloat(e.target.value) })} />
-          )}
-        </div>
-        <div>
-          <label>{copy.labels.competitorAvgTx}</label>
-          <input type="number" value={competitor.avgTransactionValue} onChange={(e) => setCompetitor({ ...competitor, avgTransactionValue: parseFloat(e.target.value) || 0 })} />
-        </div>
-        <div>
-          <label>{copy.labels.competitorFeePerTx}</label>
-          <input type="number" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: parseFloat(e.target.value) || 0 })} />
-        </div>
-        <div>
-          <label>{copy.labels.hwPrice}</label>
-          <input type="number" value={hwPrice} onChange={(e) => setHwPrice(parseFloat(e.target.value) || 0)} />
-        </div>
-      </div>
+      <main className="sheet">
+        <section className="inputs">
+          <div className="panel">
+            <div className="eyebrow">{copy.client}</div>
+            <Field id="tpv" label={`${copy.labels.tpv} (${currency})`}>
+              <input id="tpv" type="number" value={tpv} onChange={(e) => setTpv(pf(e.target.value))} />
+            </Field>
+            <Field id="hw" label={`${copy.labels.hwPrice} (${currency})`}>
+              <input id="hw" type="number" value={hwPrice} onChange={(e) => setHwPrice(pf(e.target.value))} />
+            </Field>
+          </div>
 
-      <div className="summary">
-        <h2>{copy.results.header}</h2>
+          <div className="panel">
+            <div className="eyebrow"><span className="dot s2" />{copy.competitor}</div>
+            <Field id="c-tr" label={copy.labels.takeRate}>
+              <input id="c-tr" type="number" step="0.1" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: pf(e.target.value) })} />
+            </Field>
+            <Field id="c-saas" label={`${copy.labels.saas} (${currency})`}>
+              <input id="c-saas" type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: pf(e.target.value) })} />
+            </Field>
+            <div className="field-pair">
+              <Field id="c-avg" label={`${copy.labels.avgTx} (${currency})`}>
+                <input id="c-avg" type="number" value={competitor.avgTransactionValue} onChange={(e) => setCompetitor({ ...competitor, avgTransactionValue: pf(e.target.value) })} />
+              </Field>
+              <Field id="c-fee" label={`${copy.labels.feePerTx} (${currency})`}>
+                <input id="c-fee" type="number" step="0.01" value={competitor.feePerTransaction} onChange={(e) => setCompetitor({ ...competitor, feePerTransaction: pf(e.target.value) })} />
+              </Field>
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="eyebrow"><span className="dot s1" />{copy.ours}</div>
+            <Field id="o-tr" label={copy.labels.takeRate}>
+              <input id="o-tr" type="number" step="0.1" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: pf(e.target.value) })} />
+            </Field>
+            <Field id="o-saas" label={`${copy.labels.saas} (${currency})`} hint={deviceMode ? copy.saasFromSim : null}>
+              {deviceMode ? (
+                <input id="o-saas" type="number" value={Math.round(result.avg.saas)} disabled />
+              ) : (
+                <input id="o-saas" type="number" value={ours.saasFee} onChange={(e) => setOurs({ ...ours, saasFee: pf(e.target.value) })} />
+              )}
+            </Field>
+          </div>
+        </section>
+
+        <section className="kpis" aria-live="polite">
+          <div className="card hero">
+            <div className="lbl">{saving > 0.5 ? copy.results.saving : saving < -0.5 ? copy.results.extra : copy.results.equal}</div>
+            <div className="val">
+              {fmt(Math.abs(saving))} <small>{currency}</small>
+            </div>
+            <div className="sub">
+              {saving >= 0 ? copy.results.cheaper(saving, currency) : copy.results.dearer(-saving, currency)}
+              {payback && <span className="chip up">{copy.results.payback(payback)}</span>}
+            </div>
+          </div>
+          <div className="card">
+            <div className="lbl"><span className="dot s2" />{copy.results.compMonth}</div>
+            <div className="val">{fmt(compTotal)} <small>{currency}</small></div>
+          </div>
+          <div className="card">
+            <div className="lbl"><span className="dot s1" />{copy.results.oursMonth}</div>
+            <div className="val">{fmt(oursTotal)} <small>{currency}</small></div>
+          </div>
+          <div className="card">
+            <div className="lbl">{copy.results.yearSaving}</div>
+            <div className={"val " + (yearSaving >= 0 ? "pos" : "neg")}>{fmt(yearSaving)} <small>{currency}</small></div>
+          </div>
+        </section>
         {simActive && (
           <p className="avg-note">
-            {copy.results.avgNote(sim.years)} · {copy.results.avgTpv}: {result.avg.tpv.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}
+            {copy.results.avgNote(sim.years)} · {copy.results.avgTpv}: {fmt(result.avg.tpv)} {currency}
           </p>
         )}
-        <p>{copy.results.competitorTotal}: {compTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-        <p>{copy.results.ourTotal}: {oursTotal.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-        <p>{copy.results.diff}: {delta.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} {currency}</p>
-        <p><strong>{copy.results.desc(delta, payback)}</strong></p>
-      </div>
 
-      <MonthlySimulation
-        lang={lang}
-        currency={currency}
-        ours={ours}
-        hwPrice={hwPrice || 0}
-        sim={sim}
-        setSim={setSim}
-        result={result}
-        open={simOpen}
-        setOpen={setSimOpen}
-      />
+        <MonthlySimulation
+          lang={lang}
+          currency={currency}
+          ours={ours}
+          hwPrice={hwPrice || 0}
+          sim={sim}
+          setSim={setSim}
+          result={result}
+          open={simOpen}
+          setOpen={setSimOpen}
+        />
+      </main>
     </div>
   );
 }
