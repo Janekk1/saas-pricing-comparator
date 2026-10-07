@@ -58,15 +58,22 @@ export function computeSimulation({ tpv, competitor, ours, hwPrice, sim, start =
     const calYear = startYear + Math.floor((startMonth + i) / 12);
     const monthTpv = num(tpv) * (sim.season[m] / 100) * Math.pow(1 + monthlyGrowth, i);
     const txCount = competitor.avgTransactionValue > 0 ? monthTpv / competitor.avgTransactionValue : 0;
-    const compRate = (monthTpv * num(competitor.takeRate)) / 100;
-    const compCost = compRate + num(competitor.saasFee) + num(competitor.feePerTransaction) * txCount;
-    const ourRate = (monthTpv * num(ours.takeRate)) / 100;
+    // Acquiring = interchange + card scheme fees + acquirer take rate (IC++), all as % of card TPV.
+    const compCard = (monthTpv * (num(competitor.ic) + num(competitor.sf))) / 100;
+    const compMarkup = (monthTpv * num(competitor.takeRate)) / 100;
+    const compPerTx = num(competitor.feePerTransaction) * txCount;
+    const compRate = compCard + compMarkup + compPerTx;
+    const compSaas = num(competitor.saasFee);
+    const compCost = compRate + compSaas;
+    const ourCard = (monthTpv * (num(ours.ic) + num(ours.sf))) / 100;
+    const ourMarkup = (monthTpv * num(ours.takeRate)) / 100;
+    const ourRate = ourCard + ourMarkup;
     const ourSaas = saasFor(sim, m, ours.saasFee);
     const ourCost = ourRate + ourSaas;
     const saving = compCost - ourCost;
     cumulative += saving;
     if (paybackMonth === null && hwPrice > 0 && cumulative >= hwPrice) paybackMonth = i + 1;
-    rows.push({ i, m, calYear, year: Math.floor(i / 12) + 1, monthTpv, compRate, compCost, ourRate, ourSaas, ourCost, saving, cumulative });
+    rows.push({ i, m, calYear, year: Math.floor(i / 12) + 1, monthTpv, compCard, compMarkup, compPerTx, compRate, compSaas, compCost, ourCard, ourMarkup, ourRate, ourSaas, ourCost, saving, cumulative });
   }
 
   const sum = (list, key) => list.reduce((a, r) => a + r[key], 0);
@@ -85,6 +92,12 @@ export function computeSimulation({ tpv, competitor, ours, hwPrice, sim, start =
     comp: totals.comp / n,
     ours: totals.ours / n,
     saas: sum(rows, "ourSaas") / n,
+    compCard: sum(rows, "compCard") / n,
+    compMarkup: sum(rows, "compMarkup") / n,
+    compPerTx: sum(rows, "compPerTx") / n,
+    compSaas: sum(rows, "compSaas") / n,
+    ourCard: sum(rows, "ourCard") / n,
+    ourMarkup: sum(rows, "ourMarkup") / n,
   };
 
   return { rows, yearly, totals, avg, paybackMonth };

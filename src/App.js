@@ -17,12 +17,17 @@ const T = {
     labels: {
       tpv: "Měsíční karetní TPV",
       hwPrice: "Cena nového HW",
-      takeRate: "IC++ take rate (%)",
+      takeRate: "IC++ marže / take rate (%)",
       saas: "Měsíční SAAS poplatek",
       avgTx: "Průměrná hodnota transakce",
       feePerTx: "Poplatek za transakci",
+      ic: "Interchange fee (%)",
+      sf: "Card scheme fees (%)",
     },
     saasFromSim: "Průměr z roční simulace (SaaS + licence)",
+    pushToOurs: "Přenést IF a SF do Storyous + Teya →",
+    pushToComp: "← Přenést IF a SF ke konkurenci",
+    breakdown: { card: "IF + SF", markup: "marže", perTx: "za transakce", saas: "SaaS" },
     results: {
       saving: "Měsíční úspora klienta",
       extra: "Měsíční navýšení pro klienta",
@@ -30,6 +35,10 @@ const T = {
       compMonth: "Konkurence / měsíc",
       oursMonth: "Storyous + Teya / měsíc",
       yearSaving: "Úspora za 12 měsíců",
+      heroSave: "Klient ušetří za 12 měsíců",
+      heroExtra: "Klient zaplatí navíc za 12 měsíců",
+      heroPerMonth: (v, cur) => `to je ${fmt(v)} ${cur} každý měsíc`,
+      year: "za 12 měsíců",
       payback: (m) => `HW se vrátí za ${m} měs.`,
       avgNote: (y) => `Měsíční průměr z roční simulace (${y === 1 ? "1 rok" : y + " roky"})`,
       avgTpv: "průměrné TPV",
@@ -49,12 +58,17 @@ const T = {
     labels: {
       tpv: "Mesačné kartové TPV",
       hwPrice: "Cena nového HW",
-      takeRate: "IC++ take rate (%)",
+      takeRate: "IC++ marža / take rate (%)",
       saas: "Mesačný SAAS poplatok",
       avgTx: "Priemerná hodnota transakcie",
       feePerTx: "Poplatok za transakciu",
+      ic: "Interchange fee (%)",
+      sf: "Card scheme fees (%)",
     },
     saasFromSim: "Priemer z ročnej simulácie (SaaS + licencie)",
+    pushToOurs: "Preniesť IF a SF do Storyous + Teya →",
+    pushToComp: "← Preniesť IF a SF ku konkurencii",
+    breakdown: { card: "IF + SF", markup: "marža", perTx: "za transakcie", saas: "SaaS" },
     results: {
       saving: "Mesačná úspora klienta",
       extra: "Mesačné navýšenie pre klienta",
@@ -62,6 +76,10 @@ const T = {
       compMonth: "Konkurencia / mesiac",
       oursMonth: "Storyous + Teya / mesiac",
       yearSaving: "Úspora za 12 mesiacov",
+      heroSave: "Klient ušetrí za 12 mesiacov",
+      heroExtra: "Klient zaplatí navyše za 12 mesiacov",
+      heroPerMonth: (v, cur) => `to je ${fmt(v)} ${cur} každý mesiac`,
+      year: "za 12 mesiacov",
       payback: (m) => `HW sa vráti za ${m} mes.`,
       avgNote: (y) => `Mesačný priemer z ročnej simulácie (${y === 1 ? "1 rok" : y + " roky"})`,
       avgTpv: "priemerné TPV",
@@ -81,12 +99,17 @@ const T = {
     labels: {
       tpv: "Monthly card TPV",
       hwPrice: "New hardware price",
-      takeRate: "IC++ take rate (%)",
+      takeRate: "IC++ margin / take rate (%)",
       saas: "Monthly SaaS fee",
       avgTx: "Average transaction value",
       feePerTx: "Fee per transaction",
+      ic: "Interchange fee (%)",
+      sf: "Card scheme fees (%)",
     },
     saasFromSim: "Average from the yearly simulation (SaaS + licences)",
+    pushToOurs: "Copy IF and SF to Storyous + Teya →",
+    pushToComp: "← Copy IF and SF to competitor",
+    breakdown: { card: "IF + SF", markup: "margin", perTx: "per transaction", saas: "SaaS" },
     results: {
       saving: "Client's monthly saving",
       extra: "Client's monthly extra cost",
@@ -94,6 +117,10 @@ const T = {
       compMonth: "Competitor / month",
       oursMonth: "Storyous + Teya / month",
       yearSaving: "Saving over 12 months",
+      heroSave: "Client saves over 12 months",
+      heroExtra: "Client pays extra over 12 months",
+      heroPerMonth: (v, cur) => `that is ${fmt(v)} ${cur} every month`,
+      year: "over 12 months",
       payback: (m) => `Hardware pays back in ${m} mo.`,
       avgNote: (y) => `Monthly average of the yearly simulation (${y === 1 ? "1 year" : y + " years"})`,
       avgTpv: "average TPV",
@@ -123,6 +150,9 @@ export default function App() {
   const [currency, setCurrency] = useState(DEFAULTS.currency);
   const [lang, setLang] = useState(DEFAULTS.lang);
   const [hwPrice, setHwPrice] = useState(0);
+  // Interchange (IF) and card scheme fees (SF) in % of TPV: shared defaults, optional per-side override (null = shared).
+  const [compCard, setCompCard] = useState({ ic: 0.3, sf: 0.1 });
+  const [ourCard, setOurCard] = useState({ ic: 0.3, sf: 0.1 });
   const [sim, setSim] = useState(DEFAULT_SIM);
   const [simOpen, setSimOpen] = useState(false);
 
@@ -130,12 +160,36 @@ export default function App() {
 
   // The results are the monthly average of the yearly simulation.
   // With default simulation settings (100 % every month, flat SaaS) this equals the simple one-month calculation.
-  const result = computeSimulation({ tpv, competitor, ours, hwPrice: hwPrice || 0, sim });
+  const compIc = compCard.ic;
+  const compSf = compCard.sf;
+  const ourIc = ourCard.ic;
+  const ourSf = ourCard.sf;
+  const sameCardFees = compIc === ourIc && compSf === ourSf;
+  // Copy one side's IF and SF to the other side.
+  const pushToOurs = () => setOurCard({ ic: compIc, sf: compSf });
+  const pushToComp = () => setCompCard({ ic: ourIc, sf: ourSf });
+
+  const result = computeSimulation({
+    tpv,
+    competitor: { ...competitor, ic: compIc, sf: compSf },
+    ours: { ...ours, ic: ourIc, sf: ourSf },
+    hwPrice: hwPrice || 0,
+    sim,
+  });
+  const av = result.avg;
+  const cardField = (id, value, onChange) => (
+    <div className="field">
+      <label htmlFor={id}>{id.endsWith("ic") ? copy.labels.ic : copy.labels.sf}</label>
+      <input id={id} type="number" step="0.01" min="0" value={value} onChange={onChange} />
+    </div>
+  );
   const simActive = isSimCustomised(sim);
   const compTotal = result.avg.comp;
   const oursTotal = result.avg.ours;
   const saving = compTotal - oursTotal;
-  const yearSaving = result.yearly[0] ? result.yearly[0].saving : saving * 12;
+  const year1 = result.yearly[0] || { comp: compTotal * 12, ours: oursTotal * 12, saving: saving * 12 };
+  const yearSaving = year1.saving;
+  const yearMax = Math.max(year1.comp, year1.ours, 1);
   const payback = saving > 0 && hwPrice > 0 ? Math.ceil(hwPrice / saving) : null;
   const deviceMode = sim.saasMode === "device";
 
@@ -183,6 +237,13 @@ export default function App() {
             <Field id="c-tr" label={copy.labels.takeRate}>
               <input id="c-tr" type="number" step="0.1" value={competitor.takeRate} onChange={(e) => setCompetitor({ ...competitor, takeRate: readNum(e) })} />
             </Field>
+            <div className="field-pair">
+              {cardField("c-ic", compIc, (e) => setCompCard({ ...compCard, ic: readNum(e) }))}
+              {cardField("c-sf", compSf, (e) => setCompCard({ ...compCard, sf: readNum(e) }))}
+            </div>
+            {!sameCardFees && (
+              <button type="button" className="pill-btn small push" onClick={pushToOurs}>{copy.pushToOurs}</button>
+            )}
             <Field id="c-saas" label={`${copy.labels.saas} (${currency})`}>
               <input id="c-saas" type="number" value={competitor.saasFee} onChange={(e) => setCompetitor({ ...competitor, saasFee: readNum(e) })} />
             </Field>
@@ -201,6 +262,13 @@ export default function App() {
             <Field id="o-tr" label={copy.labels.takeRate}>
               <input id="o-tr" type="number" step="0.1" value={ours.takeRate} onChange={(e) => setOurs({ ...ours, takeRate: readNum(e) })} />
             </Field>
+            <div className="field-pair">
+              {cardField("o-ic", ourIc, (e) => setOurCard({ ...ourCard, ic: readNum(e) }))}
+              {cardField("o-sf", ourSf, (e) => setOurCard({ ...ourCard, sf: readNum(e) }))}
+            </div>
+            {!sameCardFees && (
+              <button type="button" className="pill-btn small push" onClick={pushToComp}>{copy.pushToComp}</button>
+            )}
             <Field id="o-saas" label={`${copy.labels.saas} (${currency})`} hint={deviceMode ? copy.saasFromSim : null}>
               {deviceMode ? (
                 <input id="o-saas" type="number" value={Math.round(result.avg.saas)} disabled />
@@ -211,28 +279,59 @@ export default function App() {
           </div>
         </section>
 
-        <section className="kpis" aria-live="polite">
-          <div className="card hero">
-            <div className="lbl">{saving > 0.5 ? copy.results.saving : saving < -0.5 ? copy.results.extra : copy.results.equal}</div>
-            <div className="val">
-              {fmt(Math.abs(saving))} <small>{currency}</small>
+        <section className="year-hero" aria-live="polite">
+          <div className="yh-main">
+            <div className="lbl">{yearSaving >= 0 ? copy.results.heroSave : copy.results.heroExtra}</div>
+            <div className="yh-val">
+              {fmt(Math.abs(yearSaving))} <small>{currency}</small>
             </div>
             <div className="sub">
-              {saving >= 0 ? copy.results.cheaper(saving, currency) : copy.results.dearer(-saving, currency)}
+              {copy.results.heroPerMonth(Math.abs(yearSaving) / 12, currency)}
               {payback && <span className="chip up">{copy.results.payback(payback)}</span>}
             </div>
+          </div>
+          <div className="yh-compare">
+            {[
+              { key: "comp", label: copy.competitor, value: year1.comp, cls: "s2" },
+              { key: "ours", label: copy.ours, value: year1.ours, cls: "s1" },
+            ].map((r) => (
+              <div className="yh-row" key={r.key}>
+                <div className="yh-row-h">
+                  <span>{r.label} <span className="muted-inline">{copy.results.year}</span></span>
+                  <strong>{fmt(r.value)} {currency}</strong>
+                </div>
+                <div className="yh-track">
+                  <div className={"yh-fill " + r.cls} style={{ width: `${(r.value / yearMax) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="kpis" aria-live="polite">
+          <div className="card">
+            <div className="lbl">{saving > 0.5 ? copy.results.saving : saving < -0.5 ? copy.results.extra : copy.results.equal}</div>
+            <div className={"val " + (saving >= 0 ? "pos" : "neg")}>{fmt(Math.abs(saving))} <small>{currency}</small></div>
+            <div className="sub">{saving >= 0 ? copy.results.cheaper(saving, currency) : copy.results.dearer(-saving, currency)}</div>
           </div>
           <div className="card">
             <div className="lbl"><span className="dot s2" />{copy.results.compMonth}</div>
             <div className="val">{fmt(compTotal)} <small>{currency}</small></div>
+            <dl className="breakdown">
+              <div><dt>{copy.breakdown.card}</dt><dd>{fmt(av.compCard)}</dd></div>
+              <div><dt>{copy.breakdown.markup}</dt><dd>{fmt(av.compMarkup)}</dd></div>
+              {av.compPerTx > 0 && <div><dt>{copy.breakdown.perTx}</dt><dd>{fmt(av.compPerTx)}</dd></div>}
+              <div><dt>{copy.breakdown.saas}</dt><dd>{fmt(av.compSaas)}</dd></div>
+            </dl>
           </div>
           <div className="card">
             <div className="lbl"><span className="dot s1" />{copy.results.oursMonth}</div>
             <div className="val">{fmt(oursTotal)} <small>{currency}</small></div>
-          </div>
-          <div className="card">
-            <div className="lbl">{copy.results.yearSaving}</div>
-            <div className={"val " + (yearSaving >= 0 ? "pos" : "neg")}>{fmt(yearSaving)} <small>{currency}</small></div>
+            <dl className="breakdown">
+              <div><dt>{copy.breakdown.card}</dt><dd>{fmt(av.ourCard)}</dd></div>
+              <div><dt>{copy.breakdown.markup}</dt><dd>{fmt(av.ourMarkup)}</dd></div>
+              <div><dt>{copy.breakdown.saas}</dt><dd>{fmt(av.saas)}</dd></div>
+            </dl>
           </div>
         </section>
         {simActive && (

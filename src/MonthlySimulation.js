@@ -47,7 +47,7 @@ const TEXT = {
     total: "Celkem",
     competitorFees: "Poplatky konkurence",
     ourFees: "Poplatky Storyous + Teya",
-    takeRateShare: "z toho procentní poplatek",
+    takeRateShare: "z toho akvírování (IF + SF + marže)",
     summary: (s, cur, months) =>
       s >= 0
         ? `Za ${months} měsíců klient ušetří ${fmt(s)} ${cur}.`
@@ -94,7 +94,7 @@ const TEXT = {
     total: "Spolu",
     competitorFees: "Poplatky konkurencie",
     ourFees: "Poplatky Storyous + Teya",
-    takeRateShare: "z toho percentuálny poplatok",
+    takeRateShare: "z toho akvirovanie (IF + SF + marža)",
     summary: (s, cur, months) =>
       s >= 0
         ? `Za ${months} mesiacov klient ušetrí ${fmt(s)} ${cur}.`
@@ -141,7 +141,7 @@ const TEXT = {
     total: "Total",
     competitorFees: "Competitor fees",
     ourFees: "Storyous + Teya fees",
-    takeRateShare: "of which percentage fee",
+    takeRateShare: "of which acquiring (IF + SF + margin)",
     summary: (s, cur, months) =>
       s >= 0
         ? `Over ${months} months the client saves ${fmt(s)} ${cur}.`
